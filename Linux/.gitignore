@@ -1,0 +1,12 @@
+# Ignoring this folder
+downloads/
+mods/
+*.jar
+*.iso
+*.zip
+*.rar
+*.exe
+__pycache__/
+*.pyc
+*.log
+.DS_Store
