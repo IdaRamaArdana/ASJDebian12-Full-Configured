@@ -1,11 +1,8 @@
 #!/bin/bash
-
 echo "buat agar script bisa di eksekusi/dirun: ~# chmod +x auto-setup-server.sh"
 echo "jalankan dengan: ~# ./auto-setup-server.sh"
 
-
 set -e
-
 # ---- INFO ----
 echo "Setting interface server with LLM now... ⏳"
 
@@ -225,7 +222,7 @@ systemctl enable llm-webui.service
 systemctl start llm-webui.service
 
 # 11. DONE
-echo -e "\n✅ All Done and Finished!"
+echo -e "\n All Done and Finished!"
 echo "- IP Host-Only: 192.168.27.5"
 echo "- IP Bridge (LAN/Mikrotik): 192.168.27.10"
 echo "- Apache2/phpMyAdmin: http://192.168.27.10/phpmyadmin"
