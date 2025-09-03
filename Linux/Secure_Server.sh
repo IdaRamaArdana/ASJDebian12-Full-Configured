@@ -9,7 +9,6 @@ apt install -y sudo curl wget git iptables-persistent build-essential \
     suricata elasticsearch kibana filebeat \
     wireguard tailscale # tailscale opsional
 
-# 2. Set IP internal static
 cat > /etc/network/interfaces <<EOF
 auto enp0s3
 iface enp0s3 inet static
@@ -20,20 +19,17 @@ iface enp0s3 inet static
 EOF
 systemctl restart networking
 
-# 3. Buat user
 for u in admin developer ftp masmin; do
   useradd -m -s /bin/bash "$u" || true
   echo "$u:ChangeMe123" | chpasswd
 done
 
-# 4. Setup FTP – folder hanya akses ftp user
 mkdir -p /home/ftp/data
 chown ftp:ftp /home/ftp/data
 chmod 750 /home/ftp/data
 sed -i 's/DefaultRoot .*/DefaultRoot \/home\/ftp/' /etc/proftpd/proftpd.conf
 systemctl restart proftpd
 
-# 5. Enable IP forwarding & basic firewall
 sysctl -w net.ipv4.ip_forward=1
 iptables -P INPUT DROP
 iptables -A INPUT -i lo -j ACCEPT
@@ -43,7 +39,6 @@ iptables -A INPUT -p udp --dport 51820 -j ACCEPT
 iptables -A INPUT -p tcp --dport 5601 -j ACCEPT
 iptables-save > /etc/iptables/rules.v4
 
-# 6. Install WireGuard (server config)
 cat > /etc/wireguard/wg0.conf <<EOF
 [Interface]
 Address = 10.0.0.1/24
@@ -59,21 +54,18 @@ chmod 600 /etc/wireguard/wg0.conf
 systemctl enable wg-quick@wg0
 systemctl start wg-quick@wg0
 
-# 7. (Opsional) Tailscale – cara install
-# curl -fsSL https://tailscale.com/install.sh | sh
-# tailscale up --advertise-exit-node
+# (Opsional) Tailscale
+# curl -fsSL https://tailscale.com/install.sh | sh    // use auto key gen setup
+# tailscale up --advertise-exit-node      // exit node
 
-# 8. Suricata IDS/IPS
 sed -i 's/HOME_NET.*/HOME_NET: "[192.168.27.0\/28]"/' /etc/suricata/suricata.yaml
 sed -i 's/# community-id:/community-id: true/' /etc/suricata/suricata.yaml
 systemctl enable suricata
 systemctl restart suricata
 
-# 9. Elastic Stack + Filebeat
 systemctl enable elasticsearch kibana filebeat
 systemctl start elasticsearch kibana filebeat
 
-# Filebeat config untuk Suricata
 cat > /etc/filebeat/filebeat.yml <<EOF
 filebeat.inputs:
 - type: log
